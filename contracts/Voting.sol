@@ -18,6 +18,7 @@ contract Voting is Ownable {
   uint256 public immutable votingDuration;
   uint256 public votersCount = 0;
   Votes public votesTotal;
+  address[] public voters;
 
   string public proposalUri;
 
@@ -57,6 +58,10 @@ contract Voting is Ownable {
     votingStart = getBlockTimestamp();
   }
 
+  function isOpen() public view returns (bool) {
+    return (votingStart != 0);
+  }
+
   function getBlockTimestamp() public view returns (uint256) {
     return block.timestamp;
   }
@@ -71,6 +76,7 @@ contract Voting is Ownable {
     choices[address(this)] = Choice.Yes;
     votersCount += 1;
     votesTotal.yes += 1;
+    voters.push(address(this));
   }
 
   function voteNo() public isVoteOpen {
@@ -79,6 +85,7 @@ contract Voting is Ownable {
     choices[address(this)] = Choice.No;
     votersCount += 1;
     votesTotal.no += 1;
+    voters.push(address(this));
   }
 
   function voteAbstain() public isVoteOpen {
@@ -87,7 +94,16 @@ contract Voting is Ownable {
     choices[address(this)] = Choice.Abstain;
     votersCount += 1;
     votesTotal.abstain += 1;
+    voters.push(address(this));
   }
 
+  function getAllVoters() public view returns (address[] memory) {
+    address[] memory allVoters = new address[](votersCount);
+    for (uint i = 0; i < votersCount; i++) {
+      allVoters[i] = voters[i];
+    }
+
+    return allVoters;
+  }
 
 }

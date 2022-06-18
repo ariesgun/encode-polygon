@@ -9,11 +9,13 @@ import contractAbi from './utils/contractABI.json';
 import polygonLogo from './assets/polygonlogo.png';
 import ethLogo from './assets/ethlogo.png';
 import { networks } from './utils/networks';
+import { Notification, NotificationError, NotificationSuccess } from "./components/Notification/Notification";
+import { toast } from "react-toastify";
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const CONTRACT_ADDRESS = '0x71AeD8CD169002362f2B90BA4BbFaaF4f3E6c7B2';
+const CONTRACT_ADDRESS = '0xAD5F953c42E5dEE6d93A916d5F4803C46CB81853';
 
 
 const App = () => {
@@ -21,6 +23,7 @@ const App = () => {
 	// Create a stateful variable to store the network next to all the others
 	const [network, setNetwork] = useState('');
 
+	const [voteOpen, setVoteOpen] = useState(true);
 	const [proposal, setProposal] = useState('');
 	const [voters, setVoters] = useState([]);
 	const [totalVotes, setTotalVotes] = useState([])
@@ -88,6 +91,9 @@ const App = () => {
 
 				// Check if the transaction was successfully completed
 				if (receipt.status === 1) {
+					totalVotes['yes'] += 1;
+					setTotalVotes(totalVotes);
+					toast(<NotificationSuccess text="You've successfully voted!" />);
 					console.log("Vote casted! https://mumbai.polygonscan.com/tx/"+tx.hash);
 				}
 				else {
@@ -96,6 +102,8 @@ const App = () => {
 			}
 		}
 		catch(error){
+			const msg = "Failed to vote: " + error.message.slice(0,73); 
+			toast(<NotificationError text={msg} />);
 			console.log(error);
 		}
 	}
@@ -113,6 +121,9 @@ const App = () => {
 
 				// Check if the transaction was successfully completed
 				if (receipt.status === 1) {
+					totalVotes['no'] += 1;
+					setTotalVotes(totalVotes);
+					toast(<NotificationSuccess text="You've successfully voted!" />);
 					console.log("Vote casted! https://mumbai.polygonscan.com/tx/"+tx.hash);
 				}
 				else {
@@ -121,6 +132,8 @@ const App = () => {
 			}
 		}
 		catch(error){
+			const msg = "Failed to vote: " + error.message.slice(0,73); 
+			toast(<NotificationError text={msg} />);
 			console.log(error);
 		}
 	}
@@ -138,6 +151,9 @@ const App = () => {
 
 				// Check if the transaction was successfully completed
 				if (receipt.status === 1) {
+					totalVotes['abstain'] += 1;
+					setTotalVotes(totalVotes);
+					toast(<NotificationSuccess text="You've successfully voted!" />);
 					console.log("Vote casted! https://mumbai.polygonscan.com/tx/"+tx.hash);
 				}
 				else {
@@ -145,7 +161,39 @@ const App = () => {
 				}
 			}
 		}
-		catch(error){
+		catch(error) {
+			const msg = "Failed to vote: " + error.message.slice(0,73);
+			toast(<NotificationError text={msg} />);
+			console.log(error);
+		}
+	}
+
+	const openVote = async() => {
+		try {
+			const { ethereum } = window;
+			if (ethereum) {
+				const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+				const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+
+				let tx = await contract.startVote();
+				const receipt = await tx.wait();
+
+				// Check if the transaction was successfully completed
+				if (receipt.status === 1) {
+					setVoteOpen(true);
+					toast(<NotificationSuccess text="Vote is open!" />);
+					console.log("Vote opened! https://mumbai.polygonscan.com/tx/"+tx.hash);
+				}
+				else {
+					toast(<NotificationError text="Failed to start Vote. Please try again!" />);
+					alert("Transaction failed! Please try again");
+				}
+			}
+		}
+		catch(error) {
+			const msg = "Failed to vote: " + error.message.slice(0,73); 
+			toast(<NotificationError text={msg} />);
 			console.log(error);
 		}
 	}
@@ -163,32 +211,37 @@ const App = () => {
 				const votesTotal = await contract.votesTotal();
 				const proposal = await contract.proposalUri();
 				const choices = await contract.choices(currentAccount);
+				const voters = await contract.getAllVoters();
+				const isOpen = await contract.isOpen();
 
 				console.log(votesTotal['abstain'].toNumber());
 				console.log(proposal);
 
+				setVoteOpen(isOpen);
 				setProposal(proposal);
 				setTotalVotes(votesTotal);
+				setVoters(voters);
 				
-				
+				console.log(voters);
 				console.log(choices);
 					
-				// Get all the domain names from our contract
-				const names = await contract.getAllNames();
+				// // Get all the domain names from our contract
+				// const names = await contract.getAllNames();
 					
-				// For each name, get the record and the address
-				const mintRecords = await Promise.all(names.map(async (name) => {
-				const mintRecord = await contract.records(name);
-				const owner = await contract.domains(name);
-				return {
-					id: names.indexOf(name),
-					name: name,
-					record: mintRecord,
-					owner: owner,
-				};
-			}));
+				// // For each name, get the record and the address
+				// const mintRecords = await Promise.all(names.map(async (name) => {
+				// const mintRecord = await contract.records(name);
+				// const owner = await contract.domains(name);
+				// return {
+				// 	id: names.indexOf(name),
+				// 	name: name,
+				// 	record: mintRecord,
+				// 	owner: owner,
+				// };
+				// }
+			// ));
 
-			console.log("MINTS FETCHED ", mintRecords);
+			// console.log("MINTS FETCHED ", mintRecords);
 			// setMints(mintRecords);
 			}
 		} catch(error){
@@ -262,30 +315,45 @@ const App = () => {
 		}
 
 		return (
-			<div className="form-container">
-				<h1>Proposal</h1>
-				<div className="container">
-					<div className="proposed-container">
-						<p>By: {currentAccount}</p>
+			<>
+				<Notification />
+				<div className="form-container">
+					<h1>Proposal</h1>
+					<div className="container">
+						<div className="proposed-container">
+							<p>By: {currentAccount}</p>
+						</div>
+						<div className="proposal-container">
+							<p>{proposal}</p>
+						</div>
 					</div>
-					<div className="proposal-container">
-						<p>{proposal}</p>
+
+					<div className="button-container">
+						{voteOpen && 
+							<>
+								<button className='cta-button mint-button' disabled={null} onClick={voteYes}>
+									Yes
+								</button>
+								<button className='cta-button mint-button' disabled={null} onClick={voteNo}>
+									No
+								</button>  
+								<button className='cta-button mint-button' disabled={null} onClick={voteAbstain}>
+									Abstain
+								</button>  
+							</>
+						}
+						{!voteOpen && 
+							<>
+								<br/>
+								<p>Vote is not started yet!</p>
+								<button className='cta-button mint-button' disabled={null} onClick={openVote}>
+									Start Vote
+								</button>
+							</>
+						}
 					</div>
 				</div>
-
-				<div className="button-container">
-					<button className='cta-button mint-button' disabled={null} onClick={voteYes}>
-						Yes
-					</button>
-					<button className='cta-button mint-button' disabled={null} onClick={voteNo}>
-						No
-					</button>  
-					<button className='cta-button mint-button' disabled={null} onClick={voteAbstain}>
-						Abstain
-					</button>  
-				</div>
-
-			</div>
+			</>
 		);
 	}
 
@@ -312,18 +380,16 @@ const App = () => {
 				<div>
 					<p className="subtitle"> Those who have casted their choices... </p>
 					<div>
-						<div className="voter-container">
-							<p>0x11223344556677889900</p>
-							<p>Yes</p>
-						</div>
-						<div className="voter-container">
-							<p>0x11223344556677889900</p>
-							<p>Yes</p>
-						</div>
-						<div className="voter-container">
-							<p>0x11223344556677889900</p>
-							<p>Yes</p>
-						</div>
+						{voters.map((voter) => {
+							console.log(voter);
+							return (
+								<div className="voter-container">
+									<p>{voter.slice(0, 10)}...{voter.slice(-8)}</p>
+									<p>Yes</p>
+								</div>
+							);
+							}
+						)}
 					</div>
 				</div>
 			</>
@@ -362,7 +428,7 @@ const App = () => {
 				{!currentAccount && renderNotConnectedContainer()}
 				{/* Render the input form if an account is connected */}
 				{currentAccount && renderInputForm()}
-				{currentAccount && renderVoters()}
+				{currentAccount && voteOpen && renderVoters()}
 				
 				<div className="footer-container">
 					<img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
