@@ -6,13 +6,13 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyNFT is ERC721, Ownable {
+contract MyNFT is ERC721URIStorage, Ownable {
 
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
 
   constructor() public ERC721("MyNFT", "MNFT") {
-    _setBaseURI("https://ipfs.io/ipfs/");
+    //_setBaseURI("https://ipfs.io/ipfs/");
   }
 
   function mintItem(address to, string memory tokenURI)
@@ -23,7 +23,7 @@ contract MyNFT is ERC721, Ownable {
 
       uint256 id = _tokenIds.current();
       _safeMint(to, id);
-      _setTokenURI(id, tokenURI);
+      // _setTokenURI(id, tokenURI);
 
       _tokenIds.increment();
 

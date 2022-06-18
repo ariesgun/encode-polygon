@@ -15,7 +15,10 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const myContract = await ethers.getContractAt('Voting', "0x71AeD8CD169002362f2B90BA4BbFaaF4f3E6c7B2");
+  const myContract = await ethers.getContractAt(
+    "Voting",
+    "0x71AeD8CD169002362f2B90BA4BbFaaF4f3E6c7B2"
+  );
 
   let results = await myContract.getVotesResult();
   console.log("Vote Results: ", results);
@@ -26,7 +29,7 @@ async function main() {
   // let txn = await myContract.startVote();
   // await txn.wait();
 
-  let txn = await myContract.voteYes();
+  const txn = await myContract.voteYes();
   await txn.wait();
 
   results = await myContract.getVotesResult();
