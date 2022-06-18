@@ -7,11 +7,13 @@ This repository demonstrates implementation of a simple contract on Polygon netw
 NFT Minted: https://mumbai.polygonscan.com/address/0xe5F899DdC451ef9F84AFeC3447B22d12eEE310E6
 NFT Contract: 0xe5F899DdC451ef9F84AFeC3447B22d12eEE310E6
 
+![image2](./public/nft.png)
+
 ## Dapp - dVoting
 
 Contract: 0x71AeD8CD169002362f2B90BA4BbFaaF4f3E6c7B2
 
-![image1](./public/voting.png)
+![image2](./public/voting.png)
 
 ## Template
 
