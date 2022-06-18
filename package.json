@@ -33,6 +33,9 @@
     "solidity-coverage": "^0.7.21"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.6.0"
+    "@openzeppelin/contracts": "^4.6.0",
+    "ipfs-core": "^0.15.2",
+    "ipfs-http-client": "^57.0.1",
+    "ramda": "^0.28.0"
   }
 }

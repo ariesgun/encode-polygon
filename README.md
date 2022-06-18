@@ -1,4 +1,19 @@
-# Advanced Sample Hardhat Project
+# Encode Polygon
+
+This repository demonstrates implementation of a simple contract on Polygon network. It will be submitted in the beginner track of Encode Polygon Hackhathon.
+
+## Minted NFT
+
+NFT Minted: https://mumbai.polygonscan.com/address/0xe5F899DdC451ef9F84AFeC3447B22d12eEE310E6
+NFT Contract: 0xe5F899DdC451ef9F84AFeC3447B22d12eEE310E6
+
+## Dapp - dVoting
+
+Contract: 0x71AeD8CD169002362f2B90BA4BbFaaF4f3E6c7B2
+
+![image1](./public/voting.png)
+
+## Template
 
 This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 
@@ -25,7 +40,7 @@ npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
 ```
 
-# Etherscan verification
+### Etherscan verification
 
 To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
 
